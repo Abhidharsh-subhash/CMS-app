@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import User,Blog
 from rest_framework.generics import GenericAPIView
-from .serializers import SignupSerializer,LoginSerializer,CreateListBlogSerializer,Blogs,LikeSerializer
+from .serializers import SignupSerializer,LoginSerializer,CreateListBlogSerializer,Blogs,LikeSerializer,ProfileSerializer
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
@@ -123,7 +123,7 @@ class CreateListBlog(GenericAPIView):
             }
             return Response(data=response, status=status.HTTP_404_NOT_FOUND)
         
-    def patch(self, request):
+    def put(self, request):
         user = request.user
         data = request.data
         pk = request.data.get('postid')
@@ -158,8 +158,11 @@ class likeBlogs(GenericAPIView):
     permission_classes=[IsAuthenticated]
     serializer_class=LikeSerializer
     def post(self,request):
-        serializer=self.serializer_class(data=request.data,context={'request': request})
-        if serializer.is_valid():
+        user=request.user
+        data = {'user': user.id, 'blog': request.data.get('blog')}
+        context = {'request': request}
+        serializer=self.serializer_class(data=data,context=context)
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
             response = {
                 'status': 201,
@@ -174,7 +177,31 @@ class likeBlogs(GenericAPIView):
             }
             return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
+class profile(GenericAPIView):
+    permission_classes=[IsAuthenticated]
+    serializer_class=ProfileSerializer
+    def get(self,request):
+        user = request.user
+        serializer = self.serializer_class(user)
+        return Response(serializer.data)
+    def patch(self,request):
+        user=request.user
+        serializer=self.serializer_class(user,data=request.data,partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            response={
+                'status':200,
+                'message':'Profile Updated suceessfully'
+            }
+            return Response(data=response,status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-
+class Userlist(GenericAPIView):
+    serializer_class=ProfileSerializer
+    queryset=User.objects.all()
+    def get(self,request):
+        serializer=self.serializer_class(self.get_queryset(),many=True)
+        return Response(data=serializer.data,status=status.HTTP_200_OK)
 
     

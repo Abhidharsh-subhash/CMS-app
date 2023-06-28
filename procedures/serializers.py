@@ -79,6 +79,11 @@ class LikeSerializer(serializers.ModelSerializer):
             UniqueTogetherValidator(
                 queryset=like.objects.all(),
                 fields=['blog', 'user'],
-                message='This blog is already liked by the user.'
+                message='This blog is already liked by the You.'
             )
         ]
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email','username','phone_number']

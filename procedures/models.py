@@ -38,11 +38,11 @@ class Blog(models.Model):
     creation_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.title
+        return self.id
     
 class like(models.Model):
     blog = models.ForeignKey(Blog,on_delete=models.CASCADE,related_name='post')
-    user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='user')
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='user')
 
     def __str__(self):
         return f"Likes: {self.blog.likes.count()} - {self.blog.title}"
