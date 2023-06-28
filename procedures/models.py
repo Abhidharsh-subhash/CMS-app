@@ -19,9 +19,9 @@ class CustomManager(BaseUserManager):
         return user
     
 class User(AbstractUser):
-    email=models.CharField(max_length=80,unique=True)
-    username=models.CharField(max_length=45)
-    phone_number=models.IntegerField()
+    email = models.CharField(max_length=80,unique=True)
+    username = models.CharField(max_length=45)
+    phone_number = models.IntegerField()
 
     objects=CustomManager()
     USERNAME_FIELD = "email"
@@ -31,13 +31,20 @@ class User(AbstractUser):
         return self.email
     
 class Blog(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
-    title=models.CharField(max_length=30)
-    content=models.CharField(max_length=30)
-    description=models.CharField(max_length=180)
-    creation_date=models.DateField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name='writer')
+    title = models.CharField(max_length=30)
+    content = models.CharField(max_length=30)
+    description = models.CharField(max_length=180)
+    creation_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+    
+class like(models.Model):
+    blog = models.ForeignKey(Blog,on_delete=models.CASCADE,related_name='post')
+    user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='user')
+
+    def __str__(self):
+        return f"Likes: {self.blog.likes.count()} - {self.blog.title}"
 
 

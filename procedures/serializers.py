@@ -1,9 +1,11 @@
 from rest_framework import serializers
-from .models import User,Blog
+from .models import User,Blog,like
 from rest_framework.validators import ValidationError
 from django.core.validators import RegexValidator
 from django.core.validators import EmailValidator
 from django.contrib.auth import authenticate
+from rest_framework.validators import UniqueTogetherValidator
+
 
 class PhoneValidator(RegexValidator):
     regex = r'^\+?[1-9]\d{9}$'
@@ -58,3 +60,25 @@ class CreateListBlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Blog
         fields = ['id','title','content','description']
+
+class Blogs(serializers.ModelSerializer):
+    total_likes = serializers.SerializerMethodField()
+    class Meta:
+        model=Blog
+        fields=['id','title','content','description','total_likes']
+    def get_total_likes(self, obj):
+        return obj.post.count()
+
+class LikeSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    blog = serializers.PrimaryKeyRelatedField(queryset=Blog.objects.all())
+    class Meta:
+        model = like
+        fields = ['blog','user']
+        validators = [
+            UniqueTogetherValidator(
+                queryset=like.objects.all(),
+                fields=['blog', 'user'],
+                message='This blog is already liked by the user.'
+            )
+        ]

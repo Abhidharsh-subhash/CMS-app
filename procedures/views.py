@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from .models import User,Blog
 from rest_framework.generics import GenericAPIView
-from .serializers import SignupSerializer,LoginSerializer,CreateListBlogSerializer
+from .serializers import SignupSerializer,LoginSerializer,CreateListBlogSerializer,Blogs,LikeSerializer
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
 # Create your views here.
 
 class Signup(GenericAPIView):
@@ -144,6 +145,36 @@ class CreateListBlog(GenericAPIView):
                 'message': 'Blog not found'
             }
             return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+        
+class AllBlogs(GenericAPIView):
+    permission_classes=[IsAuthenticated]
+    serializer_class=Blogs
+    queryset=Blog.objects.all()
+    def get(self,request):
+        serializer=self.serializer_class(self.get_queryset(),many=True)
+        return Response(data=serializer.data,status=status.HTTP_200_OK)
+    
+class likeBlogs(GenericAPIView):
+    permission_classes=[IsAuthenticated]
+    serializer_class=LikeSerializer
+    def post(self,request):
+        serializer=self.serializer_class(data=request.data,context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            response = {
+                'status': 201,
+                'message': 'Blog liked successfully'
+            }
+            return Response(data=response, status=status.HTTP_201_CREATED)
+        else:
+            response = {
+            'status': 400,
+            'message': 'Invalid request',
+            'errors': serializer.errors
+            }
+            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
     
