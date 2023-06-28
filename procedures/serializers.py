@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User,Blog
 from rest_framework.validators import ValidationError
 from django.core.validators import RegexValidator
 from django.core.validators import EmailValidator
@@ -41,3 +41,20 @@ class LoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email','password']
+
+class CreateListBlogSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    title=serializers.CharField(max_length=30)
+    content=serializers.CharField(max_length=30)
+    description=serializers.CharField(max_length=180)
+    def validate(self, attrs):
+        if not attrs.get('title'):
+            raise serializers.ValidationError("Title cannot be empty.")
+        if not attrs.get('content'):
+            raise serializers.ValidationError("Content cannot be empty.")
+        if not attrs.get('description'):
+            raise serializers.ValidationError("Description cannot be empty.")
+        return attrs
+    class Meta:
+        model = Blog
+        fields = ['id','title','content','description']

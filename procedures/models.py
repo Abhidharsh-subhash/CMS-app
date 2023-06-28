@@ -31,13 +31,13 @@ class User(AbstractUser):
         return self.email
     
 class Blog(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name='user')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
     title=models.CharField(max_length=30)
     content=models.CharField(max_length=30)
     description=models.CharField(max_length=180)
     creation_date=models.DateField(auto_now_add=True)
 
-    def __init__(self):
+    def __str__(self):
         return self.title
 
 

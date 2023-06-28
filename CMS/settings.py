@@ -68,7 +68,7 @@ REST_FRAMEWORK = {
 
 #this we will use only for configuring the jwt token
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=50),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=100),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     #by making it true while we paste refresh token in the refresh url it will return access and refresh token
     "ROTATE_REFRESH_TOKENS": True,
