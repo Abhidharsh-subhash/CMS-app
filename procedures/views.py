@@ -16,10 +16,13 @@ class Signup(GenericAPIView):
         data=request.data
         serializer=self.serializer_class(data=data)
         if serializer.is_valid(raise_exception=True):
+            # data = serializer.validated_data
+            # password = data.pop('password')  # Removing 'password' from the dictionary
             email = serializer.validated_data['email']
             username = serializer.validated_data['username']
             password = serializer.validated_data['password']
             phone_number = serializer.validated_data['phone_number']
+            # user = User.objects.create(**data)
             user=User.objects.create(
                 email=email,
                 username=username,
