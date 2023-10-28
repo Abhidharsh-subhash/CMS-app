@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from .models import User,Blog
-from rest_framework.generics import GenericAPIView
-from .serializers import SignupSerializer,LoginSerializer,CreateListBlogSerializer,Blogs,LikeSerializer,ProfileSerializer
+from .models import User,Blog,Comments
+from rest_framework.generics import GenericAPIView,CreateAPIView
+from .serializers import SignupSerializer,LoginSerializer,CreateListBlogSerializer,Blogs,LikeSerializer,ProfileSerializer,CommentSerializer
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
@@ -170,6 +170,29 @@ class likeBlogs(GenericAPIView):
             response = {
                 'status': 201,
                 'message': 'Blog liked successfully'
+            }
+            return Response(data=response, status=status.HTTP_201_CREATED)
+        else:
+            response = {
+            'status': 400,
+            'message': 'Invalid request',
+            'errors': serializer.errors
+            }
+            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+        
+class CommentBlogs(CreateAPIView):
+    permission_classes=[IsAuthenticated]
+    serializer_class=CommentSerializer
+    def post(self, reqeust):
+        user=reqeust.user
+        data={'user':user.id, 'blog':reqeust.data.get('blog_id'), 'comment':reqeust.data.get('comment')}
+        context={'request':reqeust}
+        serializer=self.serializer_class(data=data,context=context)
+        if serializer.is_valid():
+            serializer.save()
+            response = {
+                'status': 201,
+                'message': 'commented successfully'
             }
             return Response(data=response, status=status.HTTP_201_CREATED)
         else:

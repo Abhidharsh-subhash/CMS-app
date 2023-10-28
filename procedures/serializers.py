@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User,Blog,like
+from .models import User,Blog,like,Comments
 from rest_framework.validators import ValidationError
 from django.core.validators import RegexValidator
 from django.core.validators import EmailValidator
@@ -14,16 +14,30 @@ class PhoneValidator(RegexValidator):
 class SignupSerializer(serializers.ModelSerializer):
     email = serializers.CharField(validators=[EmailValidator()])
     phone_number = serializers.IntegerField(validators=[PhoneValidator()])
-    class Meta:
-        model = User
-        fields = ['email','username','password','phone_number']
+    username = serializers.CharField(max_length=45)
+    password = serializers.CharField(max_length=12, write_only=True)
+    repeatpassword = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text='Enter confirm password',
+        style={'input_type': 'password'}
+    )
+    
     def validate(self, attrs):
         queryset=User.objects.all()
         email_exist=queryset.filter(email=attrs['email']).exists()
+        password=attrs['password']
+        repeatpassword=attrs['repeatpassword']
+        if password != repeatpassword:
+            raise ValidationError('Password mismatch.')
         if email_exist:
-            raise ValidationError('Email has already been used')
+            raise ValidationError('Email has already been used.')
         else:
             return super().validate(attrs)
+        
+    class Meta:
+        model = User
+        fields = ['email','phone_number','username','password','repeatpassword']
         
 class LoginSerializer(serializers.ModelSerializer):
     email=serializers.EmailField(validators=[EmailValidator()])
@@ -82,6 +96,11 @@ class LikeSerializer(serializers.ModelSerializer):
                 message='This blog is already liked by the You.'
             )
         ]
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['user','blog','comment']
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:

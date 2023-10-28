@@ -17,11 +17,21 @@ class CustomManager(BaseUserManager):
         user.set_password(password)
         user.save()
         return user
+    def create_superuser(self, email, password, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+
+        return self.create_user(email, password, **extra_fields)
     
 class User(AbstractUser):
     email = models.CharField(max_length=80,unique=True)
     username = models.CharField(max_length=45)
-    phone_number = models.IntegerField()
+    phone_number = models.IntegerField(null=True)
 
     objects=CustomManager()
     USERNAME_FIELD = "email"
@@ -46,5 +56,13 @@ class like(models.Model):
 
     def __str__(self):
         return f"Likes: {self.blog.likes.count()} - {self.blog.title}"
+
+class Comments(models.Model):
+    blog = models.ForeignKey(Blog,on_delete=models.CASCADE,related_name='comblog')
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='comuser')
+    comment = models.TextField()
+
+    def __str__(self):
+        return f"user : {self.user.email} - comment : {self.comment}"
 
 

@@ -9,4 +9,5 @@ urlpatterns = [
     path('like/',views.likeBlogs.as_view(),name='like'),
     path('profile/',views.profile.as_view(),name='profile'),
     path('userlist/',views.Userlist.as_view(),name='userlist'),
+    path('CommentBlogs/',views.CommentBlogs.as_view(),name='CommentBlogs'),
 ]
